@@ -1,19 +1,65 @@
-#NUMBER GUESSING GAME
+from random import randint #importing random module to let the computer select the number between the given range
 
-#importing random module
+def play_round():
+    
+    actual_number = randint(1, 100)
+    
+    print("===" * 30)
+    print("Difficulty modes: Easy (10 guesses), Medium (6 guesses), Hard (3 guesses)")
+    print("===" * 30)
+    
+    level = input("Choose a difficulty level (Easy, Medium, Hard): ").lower()
+    
+    
+    difficulty_settings = {"easy": 10, "medium": 6, "hard": 3}
+    guesses_left = difficulty_settings.get(level, 3) # Defaults to hard if input is invalid
+    
+    attempts_used = 0
 
-import random
-a = random.randint(1,51) # use randint to pick an integer between 1-50 
-guesses = 0 # To track the number of guesses
-while True: # while True because we don't know how many attempt we need to find that number chosen by the computer 
-    guesses +=1 
-    s = int(input("Guess the number : "))
-    if (s > a) :
-        print("lower the number please")
-    elif(s == a) :
-        print("you guess it right !")
-        break
-    else :
-        print("Higher the number please")
+    while guesses_left > 0:
+        
+        try:
+            user_guess = int(input(f"\n[{guesses_left} left] Enter your guess (1-100): "))
+        except ValueError:
+            print("Please enter a valid number!")
+            continue
 
-print(f" you guess the number {a} correctly in {guesses}")
+        guesses_left -= 1
+        attempts_used += 1
+
+        if user_guess > actual_number:
+            print("Too high")
+        elif user_guess < actual_number:
+            print("Too Low")
+        else:
+            print(f"Correct! You guessed it right in {attempts_used} attempts.")
+            return  # Exit the round function immediately upon winning
+
+    
+    print(f"\nYou ran out of guesses! The number was: {actual_number}.")
+
+def start_game():
+    while True:
+        print("\n" + "===" * 20)
+        print("Welcome to Number Guessing Game (CLI)")
+        print("===" * 20)
+        print("1. Play")
+        print("2. Exit")
+
+        choice = input("Enter 1 to play and 2 to exit: ")
+        
+        if choice == "1":
+            play_round()
+           
+            wannaplay = input("\nDo you want to play another round? (yes/no): ").lower()
+            if wannaplay != "yes":
+                print("Thank you for playing!")
+                break
+        elif choice == "2":
+            print("Thank you!")
+            break
+        else:
+            print("Please enter a valid input (1 or 2).")
+
+# Start the application
+start_game()
