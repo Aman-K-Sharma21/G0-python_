@@ -3,7 +3,7 @@ with open("log.txt") as f:
 lineno = 1
 for content in contents:
     if "python" in content:
-        print("yes, python is in the line : {lineno}")
+        print(f"yes, python is in the line : {lineno}")
         break
     lineno +=1
 else:
