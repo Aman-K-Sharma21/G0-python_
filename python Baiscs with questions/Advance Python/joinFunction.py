@@ -5,6 +5,6 @@
 # # for item in list:
 # #     print(item,"and",end=" ")
 
-# a = " and ".join(list)
+# a = " and ".join(list) # this joins all the items in the list with " and " in between them.
 # a = " , ".join(list)
 # print(a)
