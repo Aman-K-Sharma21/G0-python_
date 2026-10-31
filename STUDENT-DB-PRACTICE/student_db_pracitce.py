@@ -1,20 +1,26 @@
-import sqlite3
+import mysql.connector
 
 
+DB_CONFIG = {
+    "host" : "localhost",
+    "user" : "root",
+    "password" : "aman2029",
+    "database" : "student_db"
+}
 
-connection = sqlite3.connect('students.db')
-c = connection.cursor()
+with mysql.connector.connect(**DB_CONFIG) as connection:
+    with connection.cursor() as cur:
+        cur.execute("""
+            create table if not exists students (
+                student_id integer primary key,
+                name varchar(20) not null, 
+                age int not null, 
+                course varchar(50) not null, 
+                marks float not null check(marks >=0 and marks <=100)
+            )
+        """)
 
-c.execute("""create table if not exists students (
-        student_id integer primary key,
-        name text not null, 
-        age integer not null, 
-        course text not null, 
-        marks real not null check(marks >=0 and marks <=100))"""
-        )
-
-connection.commit()
-connection.close()
+    connection.commit()
 
 
 def Add_student(Id,Name,Age,Course,Marks):
@@ -24,22 +30,20 @@ def Add_student(Id,Name,Age,Course,Marks):
     if not(0<=Age<=150):
         raise ValueError(f"Invalid age : {Age}")
     try:
-        with sqlite3.connect('students.db') as connection:
-            c = connection.cursor()
-            c.execute("insert into students (student_id,name,age,course,marks) values (?,?,?,?,?)",(Id,Name,Age,Course,Marks))
-    except sqlite3.IntegrityError as e:
+        with mysql.connector.connect(**DB_CONFIG) as connection:
+            with connection.cursor() as cur:
+                cur.execute("insert into students (student_id,name,age,course,marks) values (%s,%s,%s,%s,%s)",(Id,Name,Age,Course,Marks))
+            connection.commit()
+    except mysql.connector.IntegrityError as e:
         raise ValueError(f"Student ID {Add_student} already exists") from e
     print(f"Added student {Name} (ID {Id})")
     
 
 def View_all_student():
-    connection = sqlite3.connect('students.db')
-    c = connection.cursor()
-
-    c.execute("select student_id,name,age,course,marks from students")
-    item = c.fetchall()
-    
-    connection.close()
+    with mysql.connector.connect(**DB_CONFIG) as connection:
+        with connection.cursor() as cur:
+            cur.execute("select student_id,name,age,course,marks from students")
+            item = cur.fetchall()
 
     if not item:
         print("No students found")
@@ -56,11 +60,10 @@ def View_all_student():
     
 
 def search_by_id(Id):
-    connection = sqlite3.connect('students.db')
-    c = connection.cursor()
-    c.execute("select * from students where student_id = (?)",(Id,))
-    item = c.fetchone()
-    connection.close()
+    with mysql.connector.connect(**DB_CONFIG) as connection:
+        with connection.cursor() as cur:
+            cur.execute("select * from students where student_id = %s", (Id,))
+            item = cur.fetchone()
 
     if item is None:
         print(f"No student found with ID {Id}")
@@ -76,30 +79,32 @@ def update_student(student_id, new_marks):
     if not(0 <=new_marks<=100):
         raise ValueError(f"Invalid marks: {new_marks!r} (must be a number 0–100)")
 
-    with sqlite3.connect("students.db") as connection:
-        c = connection.cursor()
-        c.execute(
-            "update students set marks = (?) Where student_id = (?)",
+    with mysql.connector.connect(**DB_CONFIG) as connection:
+        with connection.cursor() as cur:
+            cur.execute(
+                "update students set marks = (%s) Where student_id = (%s)",
             (new_marks, student_id)
         )
-        if c.rowcount == 0:
-            print(f"No student found with ID {student_id}")
-            return
-        
+            if cur.rowcount == 0:
+                print(f"No student found with ID {student_id}")
+                return
+        connection.commit()
 
     print(f"Updated student {student_id} → marks = {new_marks}")
+    View_all_student()
 
 def Delete_student(Id):
     View_all_student()
     try:
-        with sqlite3.connect('students.db') as connection:
-            c = connection.cursor()
-            c.execute("delete from students where student_id = ?",(Id,)
-            )
-            if c.rowcount == 0:
-                print(f"No student found with ID {Id}")
-                return
-    except sqlite3.Error as e:
+        with mysql.connector.connect(**DB_CONFIG) as connection :
+            with connection.cursor() as cur :
+                cur.execute("delete from students where student_id = %s",(Id,)
+                )
+                if cur.rowcount == 0:
+                    print(f"No student found with ID {Id}")
+                    return
+            connection.commit()
+    except mysql.connector.Error as e:
         print(f"Database error : {e}")
         return
     print(f"Delete student with ID {Id}")
