@@ -2,10 +2,10 @@ import mysql.connector
 
 
 DB_CONFIG = {
-    "host" : "localhost",
-    "user" : "root",
-    "password" : "aman2029",
-    "database" : "student_db"
+    "host" : "",
+    "user" : "",
+    "password" : "",
+    "database" : ""
 }
 
 with mysql.connector.connect(**DB_CONFIG) as connection:
